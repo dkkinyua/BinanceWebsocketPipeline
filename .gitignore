@@ -26,6 +26,15 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+# Airflow config files
+airflow.cfg
+airflow.db
+webserver_config.py
+airflow-webserver.pid
+
+# Test pipeline
+test.ipynb
+
 # PyInstaller
 #  Usually these files are written by a python script from a template
 #  before PyInstaller builds the exe, so as to inject date/other infos into it.
