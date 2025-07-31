@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+    producer:
+        build: .
+        command: python3 scripts/producer.py
+        environment:
+          - KAFKA_SECRET_KEY=${KAFKA_SECRET_KEY}
+          - KAFKA_API_KEY=${KAFKA_API_KEY}
+          - BOOTSTRAP_SERVER=${BOOTSTRAP_SERVER}
+
+    consumer:
+        build: .
+        command: python3 scripts/consumer.py
+        environment:
+          - KAFKA_SECRET_KEY=${KAFKA_SECRET_KEY}
+          - KAFKA_API_KEY=${KAFKA_API_KEY}
+          - BOOTSTRAP_SERVER=${BOOTSTRAP_SERVER}
+          - DB_URL=${DB_URL}
+          - DB_USER=${DB_USER}
+          - DB_PASSWORD=${DB_PASSWORD}
