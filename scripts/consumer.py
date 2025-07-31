@@ -9,8 +9,9 @@ load_dotenv()
 
 spark = SparkSession.builder \
             .appName("SparkPostgresConsumer") \
-            .config("spark.jars.packages", "org.apache.spark:spark-sql-kafka-0-10_2.13:3.5.1") \
-            .config("spark.jars", "/home/deecodes/jars/postgresql-42.7.7.jar") \
+            .config("spark.jars.packages",
+                    "org.apache.spark:spark-sql-kafka-0-10_2.13:3.5.1,"
+                    "org.postgresql:postgresql:42.7.7") \
             .getOrCreate()
 
 def transform_data():
