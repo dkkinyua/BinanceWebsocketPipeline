@@ -33,7 +33,7 @@ producer = Producer(config)
 
 # websocket helper funcs
 def on_open(ws):
-        print("Websocket Connection open to receive connections")
+        print("Kline Websocket Connection open to receive connections...")
 
 def on_close(ws, close_status_code, close_msg):
     print("Connection closed", close_status_code, close_msg)
@@ -59,7 +59,7 @@ def on_message(ws, message):
         'closeTime': kline['T']
     }
     try:
-        producer.produce("binance-topic", json.dumps(kline_data).encode("utf-8"))
+        producer.produce("kline_data", json.dumps(kline_data).encode("utf-8"))
         print("Data sent successfully")
     except Exception as e:
          print(f"Error sending data to topic: {e}")
