@@ -15,7 +15,7 @@ spark = SparkSession.builder \
             .getOrCreate()
 
 def transform_data():
-    topic = 'binance-topic'
+    topic = 'kline_data'
 
     schema = StructType() \
         .add("close", StringType()) \
@@ -51,7 +51,8 @@ def transform_data():
         col("low").cast("float"), 
         col("open").cast("float"), 
         col("volume").cast("float"), 
-        "symbol", "interval", "numTrades", 
+        "symbol", "interval", 
+        col("numTrades").alias("num_trades"), 
         col("klineClosed").alias("isKlineClosed"),
         (col("closeTime") / 1000).cast("timestamp").alias("closetime"),
         (col("startTime") / 1000).cast("timestamp").alias("starttime")
@@ -67,13 +68,13 @@ def write_each_batch(batch_df, epoch_id):
     }
     try:
         batch_df.write \
-                .jdbc(url=os.getenv("DB_URL"), table="testcryptostreams", mode="append", properties=properties)
+                .jdbc(url=os.getenv("DB_URL"), table="websocket.kline_1m_data", mode="append", properties=properties)
     except Exception as e:
         print(f"Error writing batch data: {e}")
     
 def load():
     df = transform_data()
-    path = f"/tmp/binance_streaming/stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
+    path = f"/tmp/binance_streaming/kline_stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     try:
         df.writeStream \
         .foreachBatch(write_each_batch) \
