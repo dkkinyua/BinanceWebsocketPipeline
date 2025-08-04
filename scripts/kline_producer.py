@@ -60,6 +60,7 @@ def on_message(ws, message):
     }
     try:
         producer.produce("kline_data", json.dumps(kline_data).encode("utf-8"))
+        producer.poll(0)
         print("Data sent successfully")
     except Exception as e:
          print(f"Error sending data to topic: {e}")
@@ -81,4 +82,8 @@ def get_data(BASE_URL, symbols):
         rel.dispatch()
 
 if __name__ == '__main__':
-    get_data(BASE_URL, symbols)
+    try:
+        get_data(BASE_URL, symbols)
+    finally:
+         print("Flushing data...")
+         producer.flush()
