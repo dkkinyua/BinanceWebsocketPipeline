@@ -1,5 +1,4 @@
 import os
-from datetime import datetime
 from dotenv import load_dotenv
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import from_json, col
@@ -9,9 +8,11 @@ load_dotenv()
 
 spark = SparkSession.builder \
                     .appName("OrderBookKafkaConsumer") \
+                    .master('local[*]') \
                     .config("spark.jars.packages",
                     "org.apache.spark:spark-sql-kafka-0-10_2.13:3.5.1,"
                     "org.postgresql:postgresql:42.7.7") \
+                    .config('spark.ui.port', '4040') \
                     .getOrCreate()
 
 '''
@@ -38,6 +39,7 @@ def transform_data():
             .option('subscribe', topic) \
             .option('startingOffsets', 'earliest') \
             .option('kafka.security.protocol', 'SASL_SSL') \
+            .option("kafka.group.id", "spark_order_book_consumer") \
             .option('kafka.sasl.mechanism', 'PLAIN') \
             .option('kafka.sasl.jaas.config', f'org.apache.kafka.common.security.plain.PlainLoginModule required username="{os.getenv("KAFKA_API_KEY")}" password="{os.getenv("KAFKA_SECRET_KEY")}";') \
             .load()
@@ -54,8 +56,8 @@ def transform_data():
         col("bestbidqty").cast("float"),
         col("bestaskprice").cast("float"),
         col("bestaskqty").cast("float"),
-        (col("eventtime") / 1000).cast("timestamp"),
-        (col("transactiontime") / 1000).cast("timestamp")
+        (col("eventtime") / 1000).cast("timestamp").alias('eventtime'),
+        (col("transactiontime") / 1000).cast("timestamp").alias('transactiontime')
     )
 
     return new_df
@@ -75,7 +77,7 @@ def write_as_batch(batch_df, epoch_id):
 
 def write_to_db():
     df = transform_data()
-    path = f"/tmp/binance_streaming/book_stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}" # log path
+    path = f"/tmp/binance_streaming/book_stream" # log path
 
     try:
         df.writeStream \

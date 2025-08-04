@@ -57,6 +57,7 @@ def on_message(ws, message):
 
     try:
         producer.produce('order_book_data', json.dumps(book_data).encode('utf-8'))
+        producer.poll(0)
         print("Data sent to order_book_data topic successfully!")
     except Exception as e:
         print(f"Error producing data to topic: {e}")
@@ -78,4 +79,8 @@ def get_data(BASE_URL, symbols):
     rel.dispatch()
 
 if __name__ == '__main__':
-    get_data(BASE_URL, symbols)
+    try:
+        get_data(BASE_URL, symbols)
+    finally:
+        print("Flushing all pending messages...")
+        producer.flush()

@@ -9,6 +9,8 @@ load_dotenv()
 
 spark = SparkSession.builder \
             .appName("SparkPostgresConsumer") \
+            .master('local[*]') \
+            .config('spark.ui.port', '4041') \
             .config("spark.jars.packages",
                     "org.apache.spark:spark-sql-kafka-0-10_2.13:3.5.1,"
                     "org.postgresql:postgresql:42.7.7") \
@@ -72,7 +74,7 @@ def write_each_batch(batch_df, epoch_id):
     except Exception as e:
         print(f"Error writing batch data: {e}")
     
-def load():
+def write_to_db():
     df = transform_data()
     path = f"/tmp/binance_streaming/kline_stream_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}"
     try:
@@ -88,4 +90,4 @@ def load():
         print(f"Error loading data to db: {e}")
 
 if __name__ == '__main__':
-    load()
+    write_to_db()
